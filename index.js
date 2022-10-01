@@ -9,11 +9,26 @@ app.get('/',(req,res) => {
 })
 
 app.get('/videoInfo',async (req,res) => {
-    //https://www.youtube.com/watch?v=lHJp_3g2MAI
+    // "https://www.youtube.com/watch?v=K-Ts-NFR62o"
 
     try {
-        const info = await ytdl.getInfo("https://www.youtube.com/watch?v=K-Ts-NFR62o")
-        res.send(info)
+        const url = req.query.videoUrl
+        const info = await ytdl.getInfo(url)
+        let downloadFormat = info.formats.filter(value => {
+           return value.mimeType.includes("audio/mp4") && value.audioQuality === "AUDIO_QUALITY_MEDIUM"
+        })
+        let videoDetails = info.videoDetails
+        let thumbnail = ""
+        if(videoDetails.thumbnails.length > 0)
+            thumbnail = videoDetails.thumbnails[0].url
+
+        let obj = {
+            "title":videoDetails.title,
+            "thumbnail":thumbnail,
+            "downloadUrl":downloadFormat[0].url
+        }
+
+        res.send(obj)
     }catch (e) {
         console.log(e)
         res.send(e.message)
@@ -22,6 +37,8 @@ app.get('/videoInfo',async (req,res) => {
 })
 
 app.listen(port,() => {
-    console.log('Server Started')
+    console.log(`Server Started at : http://localhost:3000/`)
 })
+
+/*Ytdl version giving error - "ytdl-core": "^4.11.0"*/
 
